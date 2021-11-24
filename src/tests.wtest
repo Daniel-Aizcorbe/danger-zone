@@ -1,0 +1,108 @@
+import Empleado.*
+import Mision.*
+
+const oscar = new Empleado(puesto = oficinista, habilidades = [ "tocar el piano", "abrir cerraduras sencillas" ], salud = 80, misionesCompletadas = [])
+
+const carmen = new Empleado(puesto = espia, habilidades = [], salud = 100, misionesCompletadas = [])
+const juan = new Empleado(puesto = oficinista, habilidades = [ "tocar el piano", "abrir cerraduras sencillas" ], salud = 80, misionesCompletadas = [])
+const carlos = new Jefe(subordinados = [ juan ], puesto = espia, habilidades = [ "tocar la trompeta" ], salud = 40, misionesCompletadas = [])
+
+const inutil1 = new Empleado(puesto = espia, habilidades = [ "perder armas" ], salud = 100, misionesCompletadas = [])
+
+const inutil2 = new Empleado(puesto = espia, habilidades = [ "levantar hojas" ], salud = 100, misionesCompletadas = [])
+
+const inutil3 = new Empleado(puesto = espia, habilidades = [ "dormirse en momentos inoportunos" ], salud = 100, misionesCompletadas = [])
+
+const lucas = new Empleado(puesto = espia, habilidades = [ "levantar mas de 90 kilos" ], salud = 100, misionesCompletadas = [])
+
+const marcos = new Empleado(puesto = espia, habilidades = [ "buena punteria" ], salud = 100, misionesCompletadas = [])
+
+const eze = new Empleado(puesto = espia, habilidades = [ "robar a los grandes" ], salud = 100, misionesCompletadas = [])
+
+const juancitoManosHabiles = new Empleado(puesto = espia, habilidades = [ "abrir cerraduras dificiles", "esquivar camaras", "reducir guardias" ], salud = 100, misionesCompletadas = [])
+
+const oficinistaNovato = new Empleado(puesto = oficinista, habilidades = [ "usar Excel", "robar a los debiles", "patear abuelas", "saber arreglar autos" ], salud = 100, misionesCompletadas = [])
+
+const equipoDeInutiles = new EquipoDeEmpleados(integrantes = [ inutil1, inutil2, inutil3 ])
+
+const robarleUnDulceAUnBebe = new Mision(peligrosidad = 1, habilidadesNecesariasParaSerSuperada = [ "robar a los debiles" ])
+
+const robarleElBolsoAUnaAbuela = new Mision(peligrosidad = 5, habilidadesNecesariasParaSerSuperada = [ "robar a los debiles", "patear abuelas" ])
+
+const arreglarleElAutoAlJefe = new Mision(peligrosidad = 1, habilidadesNecesariasParaSerSuperada = [ "saber arreglar autos" ])
+
+const robarUnBanco = new Mision(peligrosidad = 13, habilidadesNecesariasParaSerSuperada = [ "abrir cerraduras dificiles", "esquivar camaras" ])
+
+const equipoDePrincipiantes = new EquipoDeEmpleados(integrantes = [ juan , lucas, marcos, eze ])
+
+const misionCompleja = new Mision(peligrosidad = 30, habilidadesNecesariasParaSerSuperada = [ "levantar mas de 90 kilos", "buena punteria", "robar a los grandes", "tocar el piano" ])
+
+describe "test del punto 1" {
+
+	test "un empleado al iniciar siempre esta capacitado" {
+		assert.notThat(carmen.estaIncapacitado())
+	}
+
+	test "Un espia cuya salud es menor a 15 se incapacita" {
+		carmen.recibirDanio(96)
+		assert.that(carmen.estaIncapacitado())
+	}
+
+	test "Un oficinista con 0 estrellas cuya salud es menor a 40 se incapacita" {
+		oscar.recibirDanio(41)
+		assert.that(oscar.estaIncapacitado())
+	}
+
+}
+
+describe "test del punto 2" {
+
+	test "oscar puede usar la habilidad tocar el piano y abrir cerraduras sencillas" {
+		assert.that(oscar.puedeUsar("tocar el piano"))
+		assert.that(oscar.puedeUsar("abrir cerraduras sencillas"))
+	}
+
+	test "carmen no puede abrir cerraduras simples porque no tiene esa habilidad" {
+		assert.notThat(carmen.puedeUsar("abrir cerraduras simples"))
+	}
+
+	test "carlos, el jefe de juan, puede usar las habilidades de oscar aunque él mismo no las tenga" {
+		assert.notThat(carlos.tieneLaHabilidad("tocar el piano"))
+		assert.notThat(carlos.tieneLaHabilidad("abrir cerraduras sencillas"))
+		assert.that(carlos.puedeUsar("tocar el piano"))
+		assert.that(carlos.puedeUsar("abrir cerraduras sencillas"))
+	}
+
+}
+
+describe "Test del punto 3" {
+
+	test "el equipo de inutiles no puede superar la mision de robar un banco" {
+		assert.notThat(equipoDeInutiles.puedeSuperar(robarUnBanco))
+	}
+
+	test "juancitoManosHabiles puede puede superar la mision de robar un banco él solito" {
+		assert.that(juancitoManosHabiles.puedeSuperar(robarUnBanco))
+	}
+
+	test "un oficinista despues de superar 3 misiones pasa a ser espia" {
+		assert.notThat(oficinistaNovato.esEspia())
+		oficinistaNovato.cumplirMision(robarleUnDulceAUnBebe)
+		oficinistaNovato.cumplirMision(robarleElBolsoAUnaAbuela)
+		oficinistaNovato.cumplirMision(arreglarleElAutoAlJefe)
+		assert.that(oficinistaNovato.esEspia())
+	}
+
+	test "un grupo de empleados principiantes pueden superar una mision compleja trabajando en equipo" {
+		assert.that(equipoDePrincipiantes.puedeSuperar(misionCompleja))
+	}
+
+	test "si un empleado sobrevive a la mision se registra en su perfil" {
+		assert.notThat(oficinistaNovato.misionesCompletadas().contains(robarleUnDulceAUnBebe))
+		oficinistaNovato.cumplirMision(robarleUnDulceAUnBebe)
+		assert.that(oficinistaNovato.estaVivo())
+		assert.that(oficinistaNovato.misionesCompletadas().contains(robarleUnDulceAUnBebe))
+	}
+
+}
+
